@@ -9,125 +9,63 @@
 import UIKit
 
 class ViewController: UIViewController {
-    // MARK: - Properties
-    var stringNumbers: [String] = [String()]
-    var operators: [String] = ["+"]
-    var index = 0
-    var isExpressionCorrect: Bool {
-        if let stringNumber = stringNumbers.last {
-            if stringNumber.isEmpty {
-                if stringNumbers.count == 1 {
-                    let alertVC = UIAlertController(title: "Zéro!", message: "Démarrez un nouveau calcul !", preferredStyle: .alert)
-                    alertVC.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-                    self.present(alertVC, animated: true, completion: nil)
-                } else {
-                    let alertVC = UIAlertController(title: "Zéro!", message: "Entrez une expression correcte !", preferredStyle: .alert)
-                    alertVC.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-                    self.present(alertVC, animated: true, completion: nil)
-                }
-                return false
-            }
-        }
-        return true
+
+    let operators = Operator()
+   
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        operators.displayAlertDelegate = self
+        operators.displayTextViewDelegate = self
+        operators.displayTotalDelegate = self
     }
-
-    var canAddOperator: Bool {
-        if let stringNumber = stringNumbers.last {
-            if stringNumber.isEmpty {
-                let alertVC = UIAlertController(title: "Zéro!", message: "Expression incorrecte !", preferredStyle: .alert)
-                alertVC.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-                self.present(alertVC, animated: true, completion: nil)
-                return false
-            }
-        }
-        return true
-    }
-
-
+    
     // MARK: - Outlets
-
     @IBOutlet weak var textView: UITextView!
     @IBOutlet var numberButtons: [UIButton]!
-
+    
+   
     // MARK: - Action
-
     @IBAction func tappedNumberButton(_ sender: UIButton) {
         for (i, numberButton) in numberButtons.enumerated() {
             if sender == numberButton {
-                addNewNumber(i)
+               operators.addNewNumber(i)
             }
         }
     }
-
+    
     @IBAction func plus() {
-        if canAddOperator {
-        	operators.append("+")
-        	stringNumbers.append("")
-            updateDisplay()
-        }
+        operators.operatorPlus()
     }
 
     @IBAction func minus() {
-        if canAddOperator {
-            operators.append("-")
-            stringNumbers.append("")
-            updateDisplay()
-        }
+        operators.operatorMinus()
     }
 
     @IBAction func equal() {
-        calculateTotal()
+        operators.calculateTotal()
     }
+   
+}
 
 
-    // MARK: - Methods
-
-    func addNewNumber(_ newNumber: Int) {
-        if let stringNumber = stringNumbers.last {
-            var stringNumberMutable = stringNumber
-            stringNumberMutable += "\(newNumber)"
-            stringNumbers[stringNumbers.count-1] = stringNumberMutable
-        }
-        updateDisplay()
+extension ViewController: DisplayAlert {
+    func viewAlert(message: String) {
+        let alertController = UIAlertController(title:"Zéro", message: message, preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        present(alertController, animated: true, completion: nil)
     }
+}
 
-    func calculateTotal() {
-        if !isExpressionCorrect {
-            return
-        }
-
-        var total = 0
-        for (i, stringNumber) in stringNumbers.enumerated() {
-            if let number = Int(stringNumber) {
-                if operators[i] == "+" {
-                    total += number
-                } else if operators[i] == "-" {
-                    total -= number
-                }
-            }
-        }
-
-        textView.text = textView.text + "=\(total)"
-
-        clear()
+extension ViewController: DisplayTextView {
+    func textView(message: String) {
+        textView.text = message
     }
+   
+}
 
-    func updateDisplay() {
-        var text = ""
-        for (i, stringNumber) in stringNumbers.enumerated() {
-            // Add operator
-            if i > 0 {
-                text += operators[i]
-            }
-            // Add number
-            text += stringNumber
-        }
-        textView.text = text
-    }
-
-    func clear() {
-        stringNumbers = [String()]
-        operators = ["+"]
-        index = 0
+extension ViewController: DislayTotal {
+    func viewTotal(message: String) {
+        textView.text = textView.text + "=\(message)"
     }
 }
