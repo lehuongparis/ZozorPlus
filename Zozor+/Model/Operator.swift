@@ -29,6 +29,7 @@ class Operator {
     
     var stringNumbers: [String] = [String()]
     var operators: [String] = ["+"]
+    var total: Double = 0.00
     
     var isExpressionCorrect: Bool {
         if let stringNumber = stringNumbers.last {
@@ -53,33 +54,15 @@ class Operator {
         }
         return true
     }
-    
-    func addNewNumber(_ newNumber: Int) {
-        if let stringNumber = stringNumbers.last {
-            var stringNumberMutable = stringNumber
-            stringNumberMutable += "\(newNumber)"
-            stringNumbers[stringNumbers.count-1] = stringNumberMutable
-        }
-        updateDisplay()
-    }
-    
-    func calculateTotal() {
-        if !isExpressionCorrect {
-            return
-        }
-        var total = 0
+
+    var canDivide: Bool {
         for (i, stringNumber) in stringNumbers.enumerated() {
-            if let number = Int(stringNumber) {
-                if operators[i] == "+" {
-                    total += number
-                } else if operators[i] == "-" {
-                    total -= number
-                }
+            if stringNumber == "0" && operators[i] == "/" {
+                displayAlertDelegate?.viewAlert(message: "Erreur: Divisé par zéro")
+                return false
             }
         }
-        let totalString = String(total)
-        displayTotalDelegate?.viewTotal(message: totalString)
-        clear()
+        return true
     }
     
     func updateDisplay() {
@@ -92,14 +75,88 @@ class Operator {
             // Add number
             text += stringNumber
         }
-            displayTextViewDelegate!.textView(message: text)
+        displayTextViewDelegate?.textView(message: text)
+    }
+    
+    func addNewNumber(_ newNumber: Int) {
+        if let stringNumber = stringNumbers.last {
+                var stringNumberMutable = stringNumber
+                stringNumberMutable += "\(newNumber)"
+                stringNumbers[stringNumbers.count-1] = stringNumberMutable
+        }
+        updateDisplay()
+    }
+    
+    private func multiplyDivideFirst() {
+        let multiplyDivide = ["x", "/"]
+        var result: Double = 0
+        var i = 0
+        
+        while i < stringNumbers.count - 1 {
+            if var numberOne = Double(stringNumbers[i]) {
+                while multiplyDivide.contains(operators[i+1]) {
+                    if let numberTwo = Double(stringNumbers[i+1]) {
+                        if operators[i+1] == "x" {
+                            result = numberOne * numberTwo
+                        } else if operators[i+1] == "/" {
+                            result = numberOne / numberTwo
+                        }
+                        stringNumbers[i] = String(result)
+                        numberOne = result
+                        stringNumbers.remove(at: i+1)
+                        operators.remove(at: i+1)
+                        if i == stringNumbers.count - 1 { return }
+                    }
+                }
+                i += 1
+            }
+        }
+    }
+
+    func calculateTotal() {
+        if !isExpressionCorrect || !canDivide {
+            return
+        }
+        multiplyDivideFirst()
+        for (i, stringNumber) in stringNumbers.enumerated() {
+            if let number = Double(stringNumber) {
+                if operators[i] == "+" {
+                    total += number
+                } else if operators[i] == "-" {
+                    total -= number
+                }
+            }
+        }
+        if total.truncatingRemainder(dividingBy: 1) == 0 {
+            let totalIntergerString = String(Int(total))
+            displayTotalDelegate?.viewTotal(message: totalIntergerString)
+        } else {
+            let totalDoubleString = String(total)
+            displayTotalDelegate?.viewTotal(message: totalDoubleString)
+        }
     }
     
     func clear() {
         stringNumbers = [String()]
         operators = ["+"]
+        total = 0
     }
     
+    func operatorMultiply() {
+        if canAddOperator {
+            operators.append("x")
+            stringNumbers.append("")
+            updateDisplay()
+        }
+    }
+    
+    func operatorDivide() {
+        if canAddOperator {
+            operators.append("/")
+            stringNumbers.append("")
+            updateDisplay()
+        }
+    }
     
     func operatorPlus() {
         if canAddOperator {
@@ -116,9 +173,4 @@ class Operator {
             updateDisplay()
         }
     }
-    
-    func operatorEgal() {
-        calculateTotal()
-    }
-    
 }
