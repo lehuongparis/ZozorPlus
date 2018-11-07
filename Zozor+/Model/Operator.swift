@@ -6,7 +6,6 @@
 //  Copyright © 2018 Ambroise Collon. All rights reserved.
 //
 
-
 import Foundation
 
 protocol DisplayAlert: class {
@@ -23,14 +22,12 @@ protocol DislayTotal: class {
 
 class Operator {
 
-    var displayAlertDelegate: DisplayAlert?
-    var displayTextViewDelegate: DisplayTextView?
-    var displayTotalDelegate: DislayTotal?
-    
+    weak var displayAlertDelegate: DisplayAlert?
+    weak var displayTextViewDelegate: DisplayTextView?
+    weak var displayTotalDelegate: DislayTotal?
     var stringNumbers: [String] = [String()]
     var operators: [String] = ["+"]
     var total: Double = 0.00
-    
     var isExpressionCorrect: Bool {
         if let stringNumber = stringNumbers.last {
             if stringNumber.isEmpty {
@@ -44,7 +41,6 @@ class Operator {
         }
         return true
     }
-    
     var canAddOperator: Bool {
         if let stringNumber = stringNumbers.last {
             if stringNumber.isEmpty {
@@ -64,7 +60,6 @@ class Operator {
         }
         return true
     }
-    
     func updateDisplay() {
         var text = ""
         for (i, stringNumber) in stringNumbers.enumerated() {
@@ -77,7 +72,6 @@ class Operator {
         }
         displayTextViewDelegate?.textView(message: text)
     }
-    
     func addNewNumber(_ newNumber: Int) {
         if let stringNumber = stringNumbers.last {
                 var stringNumberMutable = stringNumber
@@ -86,12 +80,10 @@ class Operator {
         }
         updateDisplay()
     }
-    
     private func multiplyDivideFirst() {
         let multiplyDivide = ["x", "/"]
         var result: Double = 0
         var i = 0
-        
         while i < stringNumbers.count - 1 {
             if var numberOne = Double(stringNumbers[i]) {
                 while multiplyDivide.contains(operators[i+1]) {
@@ -135,13 +127,11 @@ class Operator {
             displayTotalDelegate?.viewTotal(message: totalDoubleString)
         }
     }
-    
     func clear() {
         stringNumbers = [String()]
         operators = ["+"]
         total = 0
     }
-    
     func operatorMultiply() {
         if canAddOperator {
             operators.append("x")
@@ -149,7 +139,6 @@ class Operator {
             updateDisplay()
         }
     }
-    
     func operatorDivide() {
         if canAddOperator {
             operators.append("/")
@@ -157,7 +146,6 @@ class Operator {
             updateDisplay()
         }
     }
-    
     func operatorPlus() {
         if canAddOperator {
             operators.append("+")
@@ -165,7 +153,6 @@ class Operator {
             updateDisplay()
         }
     }
-    
     func operatorMinus() {
         if canAddOperator {
             operators.append("-")
