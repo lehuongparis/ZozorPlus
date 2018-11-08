@@ -11,20 +11,15 @@ import UIKit
 class ViewController: UIViewController {
 
     let operators = Operator()
-   
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         operators.displayAlertDelegate = self
         operators.displayTextViewDelegate = self
         operators.displayTotalDelegate = self
     }
-    
     // MARK: - Outlets
     @IBOutlet weak var textView: UITextView!
     @IBOutlet var numberButtons: [UIButton]!
-    
-   
     // MARK: - Action
     @IBAction func tappedNumberButton(_ sender: UIButton) {
         for (i, numberButton) in numberButtons.enumerated() {
@@ -32,23 +27,26 @@ class ViewController: UIViewController {
                operators.addNewNumber(i)
             }
         }
+    }    
+    @IBAction func operatorTapped(_ sender: UIButton) {
+        switch sender.title(for: .normal) {
+        case "x":
+            operators.operatorMultiply()
+        case "+":
+            operators.operatorPlus()
+        case "/":
+            operators.operatorDivide()
+        case "-":
+            operators.operatorMinus()
+        case "=":
+            operators.calculateTotal()
+            operators.clear()
+        default:
+            break
+        }
     }
     
-    @IBAction func plus() {
-        operators.operatorPlus()
-    }
-
-    @IBAction func minus() {
-        operators.operatorMinus()
-    }
-
-    @IBAction func equal() {
-        operators.calculateTotal()
-    }
-   
 }
-
-
 extension ViewController: DisplayAlert {
     func viewAlert(message: String) {
         let alertController = UIAlertController(title:"Zéro", message: message, preferredStyle: .alert)
@@ -56,16 +54,14 @@ extension ViewController: DisplayAlert {
         present(alertController, animated: true, completion: nil)
     }
 }
-
 extension ViewController: DisplayTextView {
     func textView(message: String) {
         textView.text = message
     }
-   
 }
-
 extension ViewController: DislayTotal {
     func viewTotal(message: String) {
         textView.text = textView.text + "=\(message)"
     }
 }
+

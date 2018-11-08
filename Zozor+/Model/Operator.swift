@@ -21,7 +21,6 @@ protocol DislayTotal: class {
 }
 
 class Operator {
-
     weak var displayAlertDelegate: DisplayAlert?
     weak var displayTextViewDelegate: DisplayTextView?
     weak var displayTotalDelegate: DislayTotal?
